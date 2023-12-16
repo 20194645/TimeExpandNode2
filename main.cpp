@@ -169,56 +169,34 @@ int main(){
     int sumTEN = 0;
     vector<int>  initializations = getStartedNodes(allTENs);
     for(int index : initializations){
-		  spread(allTENs, 0, index,100);
+		  spread(allTENs, 0, index,999,count);
     }
-
     //cout<<allTENs.size()<<endl;
     //cout<<newNode->tgts.size()<<endl;
     std::vector<std::pair<int, int>> redundants = filter(allTENs);
     remove2(redundants,allTENs);
+    rmtarget(allTENs);
     //cout<<redundants.size()<<endl;
     for(auto& it: allTENs)
     {
      assertTime(it,1);
     }
-     for(auto& it : allTENs)
-    {
-     sumTEN = sumTEN+it.size();
-    }
-    cout<<sumTEN<<endl;
-    vector<TimeExpandedNode*> starnode;
     for(auto& it : allTENs)
-    {
-        for(auto& a: it)
-        {
-          if(a->srcs.empty())
-          {
-            starnode.push_back(a);
-          }
-        }
-    }
-    for(auto& element : starnode){
-	    assignKey(element);
-    }
-    cout<<counter<<endl;
-    cout<<"-------------------------------------------------------"<<endl;
-    sumTEN = 0;
-    connectAllChains(allTENs,100,15);
-     for(auto& it : allTENs)
-    {
+    {   
      sumTEN = sumTEN+it.size();
     }
+    //assert(checkdup(allTENs,sumTEN));
     cout<<sumTEN<<endl;
-    int sum = 0;
-    for (auto& it : connect){
-      connectChains(allTENs,it);
-    }
-    //connectAllChains(allTENs,Points,2);
-    //(allTENs,P,90);
+    cout<<count<<endl;
+    //writefile2(allTENs);
+    //writeFile(allTENs,sumTEN);
+    cout<<"-------------------------------------------------------"<<endl;
+    connectAllChains(allTENs,200,20,count);
+    cout<<count<<endl;
     cout<<"-------------------------------------------------------"<<endl;
     std:: string filename = "intinerary.txt";
     std::string station="";
-    std::map<std::string, std::vector<ArtificialStation*>> mapArtificialStations = getTimeWindows(filename,1,station);
+    std::map<std::string, std::vector<ArtificialStation*>> mapArtificialStations = getTimeWindows(filename,200,station);
     
     replaceStation(allTENs,station);
     int i,k;
@@ -239,16 +217,26 @@ int main(){
 	 }
     }
     for (const auto& el : mapArtificialStations){ 
-     auto& v = el.second;
-	 for(auto& elem : v){
-		insert(allTENs, elem);
-	 }
+      auto& v = el.second;
+	    for(auto& elem : v){
+		  insert(allTENs, elem);
+	    }
     }
     redundants = filter(allTENs);
     remove2(redundants,allTENs);
-    
+    //rmtarget(allTENs);
     for(auto& it: allTENs)
     {
      assertTime(it,1);
     }
+    sumTEN = 0;
+    for(auto& it : allTENs)
+    {
+     sumTEN = sumTEN+it.size();
+    }
+    cout<<sumTEN<<endl;
+    //assert(checkautoincreament(count,sumTEN));
+    //
+    //writefile2(allTENs);
+    writeFile(allTENs,sumTEN);
 }

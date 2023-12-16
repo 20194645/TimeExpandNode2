@@ -5,6 +5,7 @@ class Station :  public TimeExpandedNode{
     public:
     void makestation(TimeExpandedNode* temp, std::string name)
     {
+        this->key = temp->key;
        // this->srcs = temp->srcs;
         this->srcs.clear();
         for (auto& src : temp->srcs)
@@ -66,7 +67,7 @@ class ArtificialStation : public Station{
             penaltyT = max(penaltyT, node->time - this->tardiness); 
 			auto aShape = new ArtificialShape(penaltyT);
 			node->tgts.push_back(std::make_pair(this, aShape));
-			this->srcs.push_back(std::make_pair(node, aShape));
+			//this->srcs.push_back(std::make_pair(node, aShape));
 		}
 	 }
     }

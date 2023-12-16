@@ -1,84 +1,108 @@
 #include "TimeExpandedNode.hpp"
 using namespace std;
 ofstream myfile("Result.txt");
-int counter = 0;
-void assignKey(TimeExpandedNode* element){
-   std::queue<TimeExpandedNode*> Q;
-   Q.push(element);
-   while(!Q.empty()){
-      TimeExpandedNode* temp = Q.front();
-      Q.pop();
-      if (temp!=nullptr && temp->key == -1)
+void assignKey(TimeExpandedNode* element, int* autoIncreament){
+    if(element == nullptr)
+	  {return;}
+    if(element->key == -1){
+        element->key = *autoIncreament;
+        *autoIncreament = *autoIncreament + 1;
+    }
+    if(element->tgts.empty()){
+      return;         
+    }
+    for(auto& e : element->tgts){
+      if (e.first!=nullptr)
       {
-         temp->key = counter;
-         counter = counter+1;
+       myfile<<e.first->time<<endl;
+       assignKey(e.first, autoIncreament);
       }
-      for (auto& pair : temp->tgts){
-         Q.push(pair.first);
-       }
-   }
+    }
 }
 bool checkautoincreament(int autoincreament,int sumten)
 {
-    if((autoincreament - sumten)==1)
+    if((autoincreament - sumten)==0)
     {
         return true;
     }
     return false;
 }
-/*bool checkduplicate(std::vector<std::vector<TimeExpandedNode*>> graph,int sumten){
-  x = new int[sumten];
-  memset(x,0,sizeof(int) * sumten);
-  int i;
-  int count = 0;
+bool checkdup(std::vector<std::vector<TimeExpandedNode*>> graph,int sumten){
+  set<int> count;
   for(auto& it : graph){
-    for(auto& a : it){
-        if(x[a->key]==0){
-           x[a->key] = 1;
-        }
-        else
-        {
-            cout<<a->key<<endl;
-        }
-        
+    for(auto& n : it){
+      count.insert(n->key);
     }
   }
-  /*for ( i = 0; i < sumten; i++){
-    if(x[i]!=1){
-        return false;
-        //count++;
-    } 
-  }*/
-  //return true;
-//}
+  if(count.size()==sumten) return true;
+  return false;
+}
 void writeFile(std::vector<std::vector<TimeExpandedNode*>> graph,int sumten)
 {
  int sumedge = 0;
  for(auto& it : graph)
  {
    for(auto& a : it){
-     sumedge = a->srcs.size()+sumedge+a->tgts.size();
+    if (a->key!=-1)
+    {
+     for (auto& src : a->srcs)
+     {
+      if (src.first!=nullptr)
+      {
+        if (src.first->key!=-1) sumedge = sumedge +1;
+        
+        
+      }
+      
+     }
+     for (auto& tgt : a->tgts)
+     {
+      if (tgt.first!=nullptr){
+        if (tgt.first->key!=-1)
+         sumedge = sumedge+1;
+      }
+     }
+    }
+    
+     
+     
    }
  }
  myfile<<"p"<<" "<<"min"<<" "<<sumten<<" "<<sumedge<<endl;
  for(auto& it : graph){
     for(auto& a : it){
-        for (auto& b : a->srcs){
-            if (b.second->name.find("E0")!= std::string::npos){
-                myfile<<"n "<<b.first->key<<" 1"<<endl;
-            }
+        if (a->name == "E0"&&a->key != -1)
+        {
+           myfile<<"n "<<a->key<<" 1"<<endl;
         }
+        
+        /*if (a->srcs.empty())
+        {
+          for (auto& b : a->tgts){
+            if (b.second->name.find("E0")!= std::string::npos){
+              //if (b.first!=nullptr && b.first->key!=-1) myfile<<"n "<<b.first->key<<" 1"<<endl;
+              myfile<<"n "<<a->key<<" 1"<<endl;
+            }
+          }
+        }*/
     }
  }
  for(auto& it : graph){
     for(auto& a : it){
-      for (auto& c: a->tgts)
+      if (a->tgts.empty())
       {
-         if (c.second->name.find("E92")!= std::string::npos)
+       for (auto& c: a->srcs)
+       {
+         if (c.second->name == "E92")
          {
-              myfile<<"n "<<c.first->key<<" -1"<<endl;
+            //if (c.first!=nullptr) myfile<<"n "<<c.first->key<<" -1"<<endl;
+            myfile<<"n "<<a->key<<" -1"<<endl;
          }
+       }
       }
+      
+      
+      
     }
  }
  
@@ -87,36 +111,35 @@ void writeFile(std::vector<std::vector<TimeExpandedNode*>> graph,int sumten)
  {
     for(auto& a : it)
     {
-      for(auto& b : a->srcs)
+      if (a->key!=-1)
       {
-        myfile<<"a "<<b.first->key<<" "<<a->key<<" 0 1 "<<100*a->time<<endl;
-      }
-      for(auto& c : a->tgts){
-        myfile<<"a "<<a->key<<" "<<c.first->key<<" "<<"0 1 "<<100*c.first->time<<endl;
+       for(auto& b : a->srcs)
+       {
+        if (b.first!=nullptr&&b.first->key!=-1) myfile<<"a "<<b.first->key<<" "<<a->key<<" 0 1 "<<(a->time - b.first->time)<<endl;
+       }
+       for(auto& c : a->tgts){
+        if (c.first!=nullptr&&c.first->key!=-1) myfile<<"a "<<a->key<<" "<<c.first->key<<" "<<"0 1 "<<c.first->time - a->time<<endl;
+       }
       }
     }
  }
 }
 void writefile2(std::vector<std::vector<TimeExpandedNode*>> graph){
-   for(auto& it : graph)
-   {
+  for(auto& it : graph)
+  {
     for(auto& a : it)
     {
-      for(auto& b : a->srcs){
-        myfile<<b.second->name<<" ";
+      for(auto& b : a->srcs)
+      {
+        if (b.first!=nullptr) myfile<<b.second->name<<",";
       }
       myfile<<"||";
-      myfile<<a->origin->x<<" "<<a->origin->y<<"||";
-      if (a->tgts.empty())
-      {
-        myfile<<endl;
-      }
-      
+      myfile<<a->name<<"||";
       for(auto& c : a->tgts){
-        myfile<<c.second->name<<" ";
+        if (c.first!=nullptr) myfile<<c.second->name<<" ";
       }
       myfile<<endl;
     }
-   }
+  }
 }
 

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <cmath>
+#include <unordered_map>
 #include "Point.hpp"
 #include "Shape.hpp"
 #include <vector>
@@ -13,6 +14,7 @@
 #ifndef TIME_EXPANDED_NODE_HPP
 #define TIME_EXPANDED_NODE_HPP
 using namespace std;
+
 template<typename Base, typename T> 
 inline bool instanceof(const T *ptr) 
 { return dynamic_cast<const Base*>(ptr) != nullptr; }

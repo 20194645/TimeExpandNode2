@@ -10,7 +10,7 @@ class Shape
 public:
     Point *start;
     Point *end;
-    double d = 1;
+    double d = 4;
     double time = 0;
     string name;
 
@@ -37,7 +37,7 @@ public:
 	 if(time == 0){
 		//time = this->d/Constant::v ; //Với v là hằng số của lớp Constant
         //time = 1.95
-        time  = 1;
+        time  = 2;
 	 }	
 	 return time;
     }

@@ -221,12 +221,12 @@ void makeallpart(){
     }
     for (edge e : edges)
     {
-        splitEdge(3.9, &e);
+        splitEdge(16, &e);
     }
     edges.clear();
     for (junc j : juncs)
     {
-        splitJunc(3.9, &j);
+        splitJunc(16, &j);
     }
     juncs.clear();
     //cout<<allpart.size()<<endl;

@@ -38,40 +38,57 @@ void insert(std::vector<std::vector<TimeExpandedNode*>> &graph, TimeExpandedNode
     graph.push_back(tempTEN);
      
 } 
-void spread(std::vector<std::vector<TimeExpandedNode*>> &graph, int m, int n, double H) {
+void spread(std::vector<std::vector<TimeExpandedNode*>> &graph, int m, int n, double H,int &counter) {
     map<string,int> checkTENdup;
     for (auto &pair : checkTENdup) {
         pair.second = 0;
     }
     TimeExpandedNode* node = graph[m][n];
+    if(node->key == -1){
+      node->key = counter;
+      counter++;
+    }
     std::queue<TimeExpandedNode*> Q;
     Q.push(node);
-    
     while (!Q.empty()) {
         TimeExpandedNode* temp = Q.front();
+        if (temp->key == -1)
+        {
+            temp->key = counter;
+            counter++;
+        }
+        
         Q.pop();
         
         for (auto& pair : temp->tgts) {
+            
             string coord = to_string(pair.first->origin->x)+" "+to_string(pair.first->origin->y);
             if (checkTENdup[coord]!=1){
                 checkTENdup[coord]=1;
                 Shape* s = pair.second;
                 double time = temp->time + s->getWeight();
-                if (time < H) {
+                if (time < H ) {
                 Point* origin = s->end;  TimeExpandedNode* n = pair.first;
                 TimeExpandedNode* foundItem = isAvailable(graph, origin, time);
                 if (foundItem == nullptr) {
                     TimeExpandedNode* newNode = new TimeExpandedNode();
                     newNode->setTENode(origin);
                     newNode->time= time;
-                    if (n!= nullptr){
-                     for(auto& it : n->tgts){
+                    newNode->key = -1;
+                    for(auto& it : n->tgts){
                       newNode->tgts.push_back(make_pair(it.first,it.second));
-                     }
                     }
                     pair.first = newNode;
                     foundItem = newNode;
+                    insert(graph, foundItem);// Gọi hàm đã làm ở câu (d)
+                    Q.push(foundItem);
                  }
+                 if (foundItem->key == -1)
+                 {
+                    foundItem->key = counter;
+                    counter++;
+                 }
+                 
                  int index = foundItem->indexInSources(s);
                  if (index != -1) {
                     foundItem->srcs[index].first = temp;
@@ -79,14 +96,12 @@ void spread(std::vector<std::vector<TimeExpandedNode*>> &graph, int m, int n, do
                  else {
                     foundItem->srcs.push_back(std::make_pair(temp, s));
                  }
-                 insert(graph, foundItem); // Gọi hàm đã làm ở câu (d)
-                 Q.push(foundItem);
+                 //Q.push(foundItem);
                 }
             }
            
         }
     }
-    map<string, int>().swap(checkTENdup);
 }
 
 std::vector<std::pair<int, int>> filter(std::vector<std::vector<TimeExpandedNode*>> &graph){
@@ -166,4 +181,21 @@ void assertTime(std::vector<TimeExpandedNode*> graph, double v){
             stage =1;}
     }
     if(stage == 1) cout<<"Error assertTime"<<endl;
+}
+void rmtarget(vector<vector<TimeExpandedNode *>> &graph){
+ int i,j;
+ for(auto& it : graph){
+  for (auto& n : it)
+  {
+    int k;
+    for (k=n->tgts.size()-1;k>=0;k--){
+      if (n->tgts[k].first!=nullptr)
+      {
+        if(n->tgts[k].first->time < n->time){
+         n->tgts.erase(n->tgts.begin()+k);
+        }
+      }
+    }
+  }
+ }
 }
